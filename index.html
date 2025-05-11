@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akran Zorbalığına Müdahale Oyunu</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background-color: #ece5dd; padding: 20px; }
+    #game { max-width: 600px; margin: auto; background: #ffffff; padding: 10px; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+    h1 { text-align: center; color: #075e54; }
+    .whatsapp-chat { background-color: #dcf8c6; border-radius: 7.5px; padding: 10px; margin: 5px 0; max-width: 80%; }
+    .sender { background-color: #fff; border: 1px solid #ddd; border-radius: 7.5px; padding: 10px; margin: 5px 0; max-width: 80%; text-align: left; }
+    .receiver { background-color: #dcf8c6; border-radius: 7.5px; padding: 10px; margin: 5px 0 10px auto; max-width: 80%; text-align: left; }
+    .options button { display: block; width: 100%; margin: 10px 0; padding: 10px; border-radius: 8px; border: none; cursor: pointer; background-color: #34b7f1; color: white; font-weight: bold; }
+    .quote { font-style: italic; color: #555; margin-top: 15px; text-align: center; }
+    #result { text-align: center; margin-top: 20px; font-weight: bold; font-size: 18px; color: #128c7e; }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h1>Akran Zorbalığına Müdahale Oyunu</h1>
+    <div id="question-container"></div>
+    <div id="quote" class="quote"></div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        chat: [
+          { sender: 'Mert', text: "Bugün Ayşe'nin çantasını aldım, sınıf gülmekten yerlere yattı 😂" },
+          { sender: 'Emre', text: "Hahaha kral hareket! 👑" },
+          { sender: 'Sen', text: "Bu mesajı gördüğünde ne yaparsın? 🤔" }
+        ],
+        options: [
+          { text: "Mesajı grubun yöneticisine bildiririm. 📩", score: 10 },
+          { text: "Mesajı silerim ama bir şey söylemem. 🤐", score: 2 },
+          { text: "Mert'e özelden 'yanlış yapıyorsun' yazarım. ✉️", score: 7 },
+          { text: "Ben de gülücük emojisi gönderirim. 😂", score: -5 }
+        ],
+        quote: "Zorbalığa kahkaha atmak, zorbalığın bir parçası olmaktır."
+      },
+      {
+        chat: [
+          { sender: 'Selin', text: "Yarın okulda Zeynep'i yine dışlayalım mı? Zaten kimse onu sevmiyor. 🙄" },
+          { sender: 'Berk', text: "Katılıyorum. 👍" },
+          { sender: 'Sen', text: "Bu yazışmadan sonra ne yaparsın? 🤨" }
+        ],
+        options: [
+          { text: "Zeynep'e destek olmak için onunla otururum. ❤️", score: 10 },
+          { text: "Bu tür konuşmaların yanlış olduğunu gruba yazarım. ⚠️", score: 8 },
+          { text: "Hiçbir şey yazmadan sadece çıkarım. 🚪", score: 3 },
+          { text: "Onlarla birlikte Zeynep'i dışlarım. 😕", score: -10 }
+        ],
+        quote: "Bir kişiye yapılan haksızlık, herkese yapılmış sayılır."
+      },
+      {
+        chat: [
+          { sender: 'Can', text: "Bugün okulda Ali'yi tuvalete kilitledik. Komikti bence 😂" },
+          { sender: 'Sen', text: "Ne yaparsın? 😟" }
+        ],
+        options: [
+          { text: "Durumu hemen rehber öğretmene bildiririm. 🧑‍🏫", score: 10 },
+          { text: "Can'a yaptığının yanlış olduğunu açıklarım. ✋", score: 8 },
+          { text: "Olayı duymazlıktan gelirim. 😶", score: 0 },
+          { text: "Ben de bir dahaki sefere katılırım derim. 😬", score: -8 }
+        ],
+        quote: "Sessiz kalmak, şiddetin devam etmesine izin vermektir."
+      },
+      {
+        chat: [
+          { sender: 'Gamze', text: "İnternette Ayşe'nin eski fotoğraflarını paylaştım. Komik değil mi? 🙈" },
+          { sender: 'Sen', text: "Bu mesaj sonrası nasıl tepki verirsin? 🤔" }
+        ],
+        options: [
+          { text: "Gamze'yi uyarırım ve Ayşe'yi bilgilendiririm. 📢", score: 10 },
+          { text: "Fotoğrafı bildiririm. 🚨", score: 8 },
+          { text: "Görmezden gelirim. 💤", score: 1 },
+          { text: "Fotoğrafı arkadaşlarıma da gönderirim. 🤳", score: -10 }
+        ],
+        quote: "Dijital zorbalık, gerçek hayattaki acı kadar derindir."
+      },
+      {
+        chat: [
+          { sender: 'Mehmet', text: "Hasan'ın kekemeliğiyle dalga geçtik yine, ne güldük! 🤣" },
+          { sender: 'Sen', text: "Tepkin ne olur? 😐" }
+        ],
+        options: [
+          { text: "Bunun çok kırıcı olduğunu söylerim. 💬", score: 8 },
+          { text: "Hasan'a destek olurum ve onunla daha çok konuşurum. 🤝", score: 10 },
+          { text: "Sessiz kalırım, ama içim rahatsız olur. 🤫", score: 2 },
+          { text: "Ben de taklit ederek gruba güldürmeye çalışırım. 🤡", score: -8 }
+        ],
+        quote: "Empati, kelimelerin ötesini duymaktır."
+      }
+    ];
+
+    let current = 0;
+    let totalScore = 0;
+
+    function showQuestion() {
+      if (current < scenarios.length) {
+        const scenario = scenarios[current];
+        let html = '<div class="chat">';
+        scenario.chat.forEach(message => {
+          html += `<div class="${message.sender === 'Sen' ? 'receiver' : 'sender'}"><strong>${message.sender}:</strong> ${message.text}</div>`;
+        });
+        html += '</div><div class="options">';
+        scenario.options.forEach((opt, i) => {
+          html += `<button onclick="selectOption(${opt.score})">${opt.text}</button>`;
+        });
+        html += '</div>';
+        document.getElementById('question-container').innerHTML = html;
+        document.getElementById('quote').innerText = '';
+      } else {
+        document.getElementById('question-container').innerHTML = '';
+        document.getElementById('quote').innerText = '';
+        let message = `🎉 Oyun Bitti! Toplam Puanınız: ${totalScore}`;
+        let advice = "Unutma: Sessiz kalmak, zorbalığın sürmesine izin vermektir. Değişim seninle başlar! 💪";
+        document.getElementById('result').innerHTML = `${message}<br><br><em>${advice}</em>`;
+      }
+    }
+
+    function selectOption(score) {
+      totalScore += score;
+      document.getElementById('quote').innerText = scenarios[current].quote;
+      current++;
+      setTimeout(showQuestion, 2000);
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
